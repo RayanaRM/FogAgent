@@ -1,19 +1,32 @@
 import os
+import requests
 from dotenv import load_dotenv
 
 class Validador:
     def __init__(self, containers):
         self.containers = containers
+        self._new_interval = None 
         load_dotenv()
+
+    @property
+    def new_interval(self):
+        return self._new_interval 
+
+    @new_interval.setter
+    def new_interval(self, valor):
+        self._new_interval = valor 
 
     def validate_container_limits(self):
         cpu_limit = os.getenv("CPU_LIMIT")
+        cpu_max = os.getenv("CPU_MAX")
+
         mem_limit = os.getenv("MEM_LIMIT")
+        informations_container = ""
 
         for container in self.containers:
-            informations_container = "##############\n"
-            informations_container += "\r"
-            informations_container += f"Container ID: {container.short_id}\n"
+            container_id = container.short_id
+            informations_container += "##############\n"
+            informations_container += f"Container ID: {container_id}\n"
             
             # 'stats' contém informações de uso de CPU e memória
             stats = container.stats(stream=False)
@@ -28,8 +41,18 @@ class Validador:
             container_info = container.attrs
             cpu_shares = container_info['HostConfig']['CpuShares']
 
-            #if cpu_percent >= int(cpu_limit):
-            #    informations_container += "Alcançou o limite!\n"
+            ############# CONTROLES DE LIMITES ###############
+            if int(cpu_percent) >= int(cpu_limit) and int(cpu_percent) < int(cpu_max):
+                print(int(cpu_percent))
+                informations_container += "Alcançou o limite!\n"
+                container.update(cpu_shares=int((cpu_shares + 20) / 100))
+                self.new_interval = 100
+
+            elif cpu_percent >= int(cpu_max):
+                # Crie um novo container com base na imagem
+                new_container = self.containers.create(image=container.attrs['Config']['Image'])
+                new_container.start()
+                self.new_interval = 100
 
             # Métricas de memória
             memory_stats = stats['memory_stats']
@@ -51,4 +74,3 @@ class Validador:
                 informations_container += f'  Bytes enviados: {network_info["tx_bytes"]} bytes\n'
 
         return informations_container
-    
