@@ -38,6 +38,6 @@ def obter_variavel():
 
 if __name__ == '__main__':
     # Inicializa o servidor Flask em uma thread separada
-    thread_servidor = Thread(target=app.run)
+    thread_servidor = Thread(target=app.run(host='0.0.0.0', port=80))
     thread_servidor.daemon = True
     thread_servidor.start()
