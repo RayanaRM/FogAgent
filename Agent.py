@@ -4,13 +4,17 @@ import Validator
 import os
 from dotenv import load_dotenv
 import time
-from flask import Flask, jsonify
 from threading import Thread
 from flask_cors import CORS
+from flask import Flask, request, jsonify
 
 load_dotenv()
 client = docker.from_env()
 informations_of_container = ""
+CPU_LIMIT=50
+CPU_MAX=100
+MEM_LIMIT=1000000
+INTERVAL=5 #segundos
 
 app = Flask(__name__)
 CORS(app)  # Habilita o CORS para todas as rotas da aplicação
@@ -35,6 +39,19 @@ thread_info_fecther.start()
 @app.route('/obter-variavel', methods=['GET'])
 def obter_variavel():
     return jsonify({'valor': informations_of_container})
+
+# Rota para retornar o valor da variável
+@app.route('/update-variavel', methods=['PUT'])
+def update_variavel():
+    global CPU_LIMIT
+    global MEM_LIMIT
+    # Obtenha os valores do corpo da solicitação JSON
+    data = request.get_json()
+
+    if 'cpuLimit' in data and 'memoryLimit' in data:
+      # Atualize as variáveis globais
+      CPU_LIMIT = data['cpuLimit']
+      MEM_LIMIT = data['memoryLimit']
 
 if __name__ == '__main__':
     # Inicializa o servidor Flask em uma thread separada

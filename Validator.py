@@ -43,9 +43,8 @@ class Validador:
 
             ############# CONTROLES DE LIMITES ###############
             if int(cpu_percent) >= int(cpu_limit) and int(cpu_percent) < int(cpu_max):
-                print("Primeiro limite alcançado... Aumenta tamanho do container")
                 print(int(cpu_percent))
-                informations_container += "Alcançou o limite!\n"
+                informations_container += "Alcançou o limite, redimensiona container!\n"
                 container.update(cpu_shares=int((cpu_shares + 20) / 100))
                 #self.new_interval = 100
 
@@ -66,7 +65,7 @@ class Validador:
             informations_container += f'Uso de CPU em porcentagem: {cpu_percent:.2f}%\n'
             informations_container += f'Uso de memória: {memory_usage} megabytes\n'
             informations_container += "\n"
-            informations_container += f'Limite de CPU (%): {cpu_limit}\n'
+            informations_container += f'Limite de CPU (%): {cpu_shares}\n'
             informations_container += f'Limite de memória: {memory_limit} megabytes\n'
             
             for network_interface, network_info in network_stats.items():
