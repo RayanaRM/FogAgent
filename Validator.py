@@ -25,7 +25,7 @@ class Validador:
 
         for container in self.containers:
             container_id = container.short_id
-            informations_container += "##############\n"
+            informations_container += "\n\n"
             informations_container += f"Container ID: {container_id}\n"
             
             # 'stats' contém informações de uso de CPU e memória
@@ -43,30 +43,31 @@ class Validador:
 
             ############# CONTROLES DE LIMITES ###############
             if int(cpu_percent) >= int(cpu_limit) and int(cpu_percent) < int(cpu_max):
+                print("Primeiro limite alcançado... Aumenta tamanho do container")
                 print(int(cpu_percent))
                 informations_container += "Alcançou o limite!\n"
                 container.update(cpu_shares=int((cpu_shares + 20) / 100))
-                self.new_interval = 100
+                #self.new_interval = 100
 
-            elif cpu_percent >= int(cpu_max):
+            elif int(cpu_percent) >= int(cpu_max):
                 # Crie um novo container com base na imagem
                 new_container = self.containers.create(image=container.attrs['Config']['Image'])
                 new_container.start()
-                self.new_interval = 100
+                #self.new_interval = 100
 
             # Métricas de memória
             memory_stats = stats['memory_stats']
-            memory_usage = memory_stats['usage']
-            memory_limit = memory_stats['limit']
+            memory_usage = memory_stats['usage'] / (1024 ** 2)
+            memory_limit = memory_stats['limit'] / (1024 ** 2)
             
             # Métricas de rede
             network_stats = stats['networks']
 
             informations_container += f'Uso de CPU em porcentagem: {cpu_percent:.2f}%\n'
-            informations_container += f'Uso de memória: {memory_usage} bytes\n'
-            informations_container += "\r"
-            informations_container += f'Limite de CPU (shares): {cpu_shares}\n'
-            informations_container += f'Limite de memória: {memory_limit} bytes\n'
+            informations_container += f'Uso de memória: {memory_usage} megabytes\n'
+            informations_container += "\n"
+            informations_container += f'Limite de CPU (%): {cpu_limit}\n'
+            informations_container += f'Limite de memória: {memory_limit} megabytes\n'
             
             for network_interface, network_info in network_stats.items():
                 informations_container += f'Rede {network_interface}:\n'

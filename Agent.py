@@ -21,7 +21,7 @@ def fetch_info_from_containers():
     containers = client.containers.list()
     validator = Validator.Validador(containers)
     global informations_of_container
-    informations_of_container = validator.validate_container_limits()
+    informations_of_container = validator.validate_container_limits() + f'Intervalo de Monitoramento (min): {interval}\n'
     
     if validator.new_interval != None:
       time.sleep(validator.new_interval)
