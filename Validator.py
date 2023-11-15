@@ -73,8 +73,8 @@ class Validador:
             informations_container += f'Uso de CPU em porcentagem: {cpu_percent:.2f}%\n'
             informations_container += f'Uso de memória: {memory_usage} megabytes\n'
             informations_container += "\n"
-            informations_container += f'Limite de CPU (%): {cpu_limit}\n'
-            informations_container += f'Limite de memória: {mem_limit} megabytes\n'
+            informations_container += f'Limite de CPU (%): {0}\n'
+            informations_container += f'Limite de memória: {memory_limit} megabytes\n'
             
             for network_interface, network_info in network_stats.items():
                 informations_container += f'Rede {network_interface}:\n'
